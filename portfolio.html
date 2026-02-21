@@ -1,0 +1,714 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Portfolio</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #0a0a0f;
+      --bg2: #111118;
+      --bg3: #1a1a24;
+      --line: rgba(255,255,255,0.08);
+      --accent: #c8a96e;
+      --accent2: #7c6ef5;
+      --text: #e8e6e0;
+      --muted: #7a7870;
+      --card: rgba(255,255,255,0.04);
+    }
+    html { scroll-behavior: smooth; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 300;
+      line-height: 1.7;
+      cursor: none;
+    }
+    .cursor {
+      width: 8px; height: 8px;
+      background: var(--accent);
+      border-radius: 50%;
+      position: fixed; top: 0; left: 0;
+      pointer-events: none;
+      z-index: 9999;
+    }
+    .cursor-ring {
+      width: 36px; height: 36px;
+      border: 1px solid rgba(200,169,110,0.4);
+      border-radius: 50%;
+      position: fixed; top: 0; left: 0;
+      pointer-events: none;
+      z-index: 9998;
+      transition: width 0.2s, height 0.2s, border-color 0.2s;
+    }
+    .cursor-ring.hover { width: 60px; height: 60px; border-color: var(--accent); }
+    ::-webkit-scrollbar { width: 3px; }
+    ::-webkit-scrollbar-track { background: var(--bg); }
+    ::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 2px; }
+
+    /* NAV */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 1.5rem 3rem;
+      transition: all 0.3s;
+    }
+    nav.scrolled {
+      background: rgba(10,10,15,0.92);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--line);
+    }
+    .nav-logo { font-family: 'Playfair Display', serif; font-size: 1.4rem; color: var(--accent); }
+    .nav-links { display: flex; gap: 2.5rem; list-style: none; }
+    .nav-links a {
+      font-size: 0.78rem; letter-spacing: 0.15em;
+      text-transform: uppercase; color: var(--muted);
+      text-decoration: none; transition: color 0.2s;
+      position: relative;
+    }
+    .nav-links a::after {
+      content: ''; position: absolute; bottom: -4px; left: 0; right: 0;
+      height: 1px; background: var(--accent);
+      transform: scaleX(0); transition: transform 0.2s;
+    }
+    .nav-links a:hover, .nav-links a.active { color: var(--accent); }
+    .nav-links a:hover::after, .nav-links a.active::after { transform: scaleX(1); }
+
+    /* HERO */
+    .hero {
+      min-height: 100vh;
+      display: flex; align-items: center;
+      padding: 8rem 3rem 4rem;
+      position: relative; overflow: hidden;
+    }
+    .hero-grid {
+      position: absolute; inset: 0;
+      background-image: linear-gradient(var(--line) 1px, transparent 1px),
+        linear-gradient(90deg, var(--line) 1px, transparent 1px);
+      background-size: 80px 80px; opacity: 0.4;
+    }
+    .hero-glow {
+      position: absolute; width: 600px; height: 600px;
+      background: radial-gradient(circle, rgba(124,110,245,0.12) 0%, transparent 70%);
+      top: -100px; right: -100px; pointer-events: none;
+    }
+    .hero-glow2 {
+      position: absolute; width: 400px; height: 400px;
+      background: radial-gradient(circle, rgba(200,169,110,0.08) 0%, transparent 70%);
+      bottom: 0; left: 10%; pointer-events: none;
+    }
+    .hero-content { position: relative; max-width: 900px; }
+    .hero-badge {
+      display: inline-flex; align-items: center; gap: 0.5rem;
+      font-family: 'DM Mono', monospace; font-size: 0.72rem;
+      letter-spacing: 0.2em; color: var(--accent); text-transform: uppercase;
+      margin-bottom: 1.5rem;
+      opacity: 0; animation: fadeUp 0.8s 0.2s forwards;
+    }
+    .hero-badge::before { content: ''; width: 24px; height: 1px; background: var(--accent); }
+    .hero-name {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(3.5rem, 8vw, 7rem);
+      font-weight: 700; line-height: 1.05; margin-bottom: 1.5rem;
+      opacity: 0; animation: fadeUp 0.8s 0.4s forwards;
+    }
+    .hero-name .line2 { font-style: italic; font-weight: 400; color: var(--muted); }
+    .hero-desc {
+      font-size: 1.1rem; color: var(--muted); max-width: 500px; margin-bottom: 3rem;
+      opacity: 0; animation: fadeUp 0.8s 0.6s forwards;
+    }
+    .hero-cta {
+      display: flex; gap: 1.5rem; flex-wrap: wrap;
+      opacity: 0; animation: fadeUp 0.8s 0.8s forwards;
+    }
+    .btn-primary {
+      padding: 0.85rem 2.2rem; background: var(--accent); color: #0a0a0f;
+      font-family: 'DM Sans', sans-serif; font-size: 0.82rem; font-weight: 500;
+      letter-spacing: 0.1em; text-transform: uppercase; text-decoration: none;
+      border: none; cursor: none; transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(200,169,110,0.3); }
+    .btn-outline {
+      padding: 0.85rem 2.2rem; background: transparent; color: var(--text);
+      font-family: 'DM Sans', sans-serif; font-size: 0.82rem; font-weight: 500;
+      letter-spacing: 0.1em; text-transform: uppercase; text-decoration: none;
+      border: 1px solid var(--line); cursor: none;
+      transition: border-color 0.2s, color 0.2s;
+    }
+    .btn-outline:hover { border-color: var(--accent); color: var(--accent); }
+    .hero-scroll {
+      position: absolute; bottom: 3rem; left: 3rem;
+      display: flex; align-items: center; gap: 1rem;
+      font-family: 'DM Mono', monospace; font-size: 0.7rem;
+      letter-spacing: 0.15em; color: var(--muted); text-transform: uppercase;
+      opacity: 0; animation: fadeUp 0.8s 1s forwards;
+    }
+    .scroll-line {
+      width: 1px; height: 60px;
+      background: linear-gradient(to bottom, transparent, var(--accent));
+      animation: scrollPulse 2s ease-in-out infinite;
+    }
+
+    /* SECTIONS */
+    section { padding: 6rem 3rem; }
+    .section-header {
+      display: flex; align-items: flex-end; gap: 2rem; margin-bottom: 4rem;
+    }
+    .section-num { font-family: 'DM Mono', monospace; font-size: 0.72rem; color: var(--accent); }
+    .section-title {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(2rem, 4vw, 3rem); font-weight: 700; line-height: 1.1;
+    }
+    .section-line { flex: 1; height: 1px; background: var(--line); margin-bottom: 0.5rem; }
+
+    /* PROFIL */
+    #profil { background: var(--bg2); }
+    .profil-grid { display: grid; grid-template-columns: 1fr 1.6fr; gap: 5rem; align-items: center; }
+    .profil-img-wrap { position: relative; aspect-ratio: 3/4; max-width: 340px; }
+    .profil-img-wrap::before {
+      content: ''; position: absolute;
+      top: 16px; left: 16px; right: -16px; bottom: -16px;
+      border: 1px solid var(--accent); opacity: 0.3;
+    }
+    .profil-avatar {
+      width: 100%; height: 100%;
+      background: linear-gradient(135deg, var(--bg3) 0%, #1e1e2e 100%);
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      font-size: 5rem; position: relative; z-index: 1;
+    }
+    .profil-tag {
+      display: inline-block; font-family: 'DM Mono', monospace;
+      font-size: 0.7rem; letter-spacing: 0.15em; text-transform: uppercase;
+      color: var(--accent2); background: rgba(124,110,245,0.1);
+      padding: 0.25rem 0.75rem; margin-bottom: 1.5rem;
+    }
+    .profil-text h3 { font-family: 'Playfair Display', serif; font-size: 1.8rem; margin-bottom: 1rem; }
+    .profil-text p { color: var(--muted); margin-bottom: 1.2rem; font-size: 0.95rem; }
+    .profil-info { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 2rem; }
+    .info-item { border-left: 2px solid var(--line); padding-left: 1rem; }
+    .info-label {
+      font-family: 'DM Mono', monospace; font-size: 0.65rem;
+      letter-spacing: 0.15em; text-transform: uppercase; color: var(--accent); margin-bottom: 0.25rem;
+    }
+    .info-val { font-size: 0.9rem; }
+
+    /* SKILL */
+    #skill { background: var(--bg); }
+    .skill-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1.5rem; }
+    .skill-card {
+      background: var(--card); border: 1px solid var(--line);
+      padding: 2rem; transition: border-color 0.2s, transform 0.2s;
+      position: relative; overflow: hidden;
+    }
+    .skill-card::before {
+      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+      background: linear-gradient(90deg, var(--accent2), var(--accent));
+      transform: scaleX(0); transform-origin: left; transition: transform 0.3s;
+    }
+    .skill-card:hover { border-color: rgba(255,255,255,0.15); transform: translateY(-4px); }
+    .skill-card:hover::before { transform: scaleX(1); }
+    .skill-icon { font-size: 2rem; margin-bottom: 1rem; }
+    .skill-name { font-family: 'Playfair Display', serif; font-size: 1.1rem; margin-bottom: 0.5rem; }
+    .skill-desc { font-size: 0.85rem; color: var(--muted); }
+    .skill-tags { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-top: 1rem; }
+    .skill-tag {
+      font-family: 'DM Mono', monospace; font-size: 0.65rem; letter-spacing: 0.1em;
+      color: var(--accent2); background: rgba(124,110,245,0.1); padding: 0.2rem 0.6rem;
+    }
+
+    /* PENUGASAN */
+    #penugasan { background: var(--bg2); }
+    .penugasan-tabs {
+      display: flex; flex-wrap: wrap;
+      border-bottom: 1px solid var(--line); margin-bottom: 3rem;
+    }
+    .tab-btn {
+      padding: 0.85rem 1.8rem; background: none; border: none;
+      font-family: 'DM Sans', sans-serif; font-size: 0.82rem;
+      letter-spacing: 0.08em; color: var(--muted); cursor: none;
+      position: relative; transition: color 0.2s;
+    }
+    .tab-btn::after {
+      content: ''; position: absolute; bottom: -1px; left: 0; right: 0;
+      height: 2px; background: var(--accent); transform: scaleX(0); transition: transform 0.2s;
+    }
+    .tab-btn.active { color: var(--accent); }
+    .tab-btn.active::after { transform: scaleX(1); }
+    .tab-btn:hover { color: var(--text); }
+    .penugasan-panel { display: none; animation: fadeUp 0.4s; }
+    .penugasan-panel.active { display: block; }
+    .penugasan-card {
+      background: var(--bg3); border: 1px solid var(--line);
+      padding: 2.5rem; margin-bottom: 1.5rem;
+    }
+    .penugasan-meta { display: flex; align-items: center; gap: 1rem; margin-bottom: 1.2rem; }
+    .penugasan-num {
+      font-family: 'DM Mono', monospace; font-size: 0.7rem; color: var(--accent);
+      background: rgba(200,169,110,0.1); padding: 0.25rem 0.6rem; letter-spacing: 0.1em;
+    }
+    .penugasan-date { font-size: 0.8rem; color: var(--muted); }
+    .penugasan-card h3 { font-family: 'Playfair Display', serif; font-size: 1.4rem; margin-bottom: 0.8rem; }
+    .penugasan-card p { color: var(--muted); font-size: 0.92rem; }
+    .penugasan-result { margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid var(--line); }
+    .penugasan-result-label {
+      font-family: 'DM Mono', monospace; font-size: 0.65rem; letter-spacing: 0.15em;
+      text-transform: uppercase; color: var(--accent2); margin-bottom: 0.5rem;
+    }
+
+    /* PORTFOLIO */
+    #portfolio { background: var(--bg); }
+    .portfolio-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 2rem; }
+    .portfolio-card {
+      background: var(--card); border: 1px solid var(--line);
+      overflow: hidden; transition: transform 0.3s, border-color 0.3s;
+    }
+    .portfolio-card:hover { transform: translateY(-6px); border-color: rgba(255,255,255,0.15); }
+    .portfolio-thumb {
+      height: 200px;
+      background: linear-gradient(135deg, var(--bg3), #1e1e2e);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 3rem; position: relative; overflow: hidden;
+    }
+    .portfolio-thumb::after {
+      content: ''; position: absolute; inset: 0;
+      background: linear-gradient(to bottom, transparent 50%, var(--bg3));
+    }
+    .portfolio-body { padding: 1.8rem; }
+    .portfolio-category {
+      font-family: 'DM Mono', monospace; font-size: 0.65rem;
+      letter-spacing: 0.15em; text-transform: uppercase; color: var(--accent); margin-bottom: 0.6rem;
+    }
+    .portfolio-title { font-family: 'Playfair Display', serif; font-size: 1.2rem; margin-bottom: 0.6rem; }
+    .portfolio-desc { font-size: 0.85rem; color: var(--muted); }
+    .portfolio-footer {
+      display: flex; justify-content: space-between; align-items: center;
+      margin-top: 1.2rem; padding-top: 1.2rem;
+      border-top: 1px solid var(--line); font-size: 0.78rem; color: var(--muted);
+    }
+    .portfolio-link {
+      color: var(--accent2); text-decoration: none;
+      font-family: 'DM Mono', monospace; font-size: 0.72rem; letter-spacing: 0.1em;
+    }
+    .portfolio-link:hover { color: var(--accent); }
+
+    /* KONTAK */
+    #kontak { background: var(--bg2); }
+    .kontak-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 5rem; align-items: start; }
+    .kontak-info h3 { font-family: 'Playfair Display', serif; font-size: 2rem; margin-bottom: 1.5rem; }
+    .kontak-info p { color: var(--muted); margin-bottom: 2rem; }
+    .kontak-links { display: flex; flex-direction: column; gap: 1rem; }
+    .kontak-link {
+      display: flex; align-items: center; gap: 1rem;
+      padding: 1rem 1.5rem; background: var(--bg3); border: 1px solid var(--line);
+      text-decoration: none; color: var(--text);
+      transition: border-color 0.2s, transform 0.2s;
+    }
+    .kontak-link:hover { border-color: var(--accent); transform: translateX(6px); }
+    .kontak-link-icon { font-size: 1.2rem; }
+    .kontak-link-info { flex: 1; }
+    .kontak-link-type { font-size: 0.72rem; color: var(--muted); letter-spacing: 0.1em; }
+    .kontak-link-val { font-size: 0.9rem; }
+    .kontak-form { display: flex; flex-direction: column; gap: 1.2rem; }
+    .form-group { display: flex; flex-direction: column; gap: 0.5rem; }
+    .form-label {
+      font-family: 'DM Mono', monospace; font-size: 0.68rem;
+      letter-spacing: 0.15em; text-transform: uppercase; color: var(--accent);
+    }
+    .form-input, .form-textarea {
+      background: var(--bg3); border: 1px solid var(--line);
+      padding: 0.85rem 1.2rem; color: var(--text);
+      font-family: 'DM Sans', sans-serif; font-size: 0.9rem;
+      outline: none; transition: border-color 0.2s;
+    }
+    .form-input:focus, .form-textarea:focus { border-color: var(--accent2); }
+    .form-textarea { min-height: 120px; resize: vertical; }
+    .form-submit {
+      padding: 0.95rem; background: var(--accent); color: #0a0a0f;
+      border: none; cursor: none;
+      font-family: 'DM Sans', sans-serif; font-size: 0.82rem;
+      font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase;
+      transition: opacity 0.2s, transform 0.2s;
+    }
+    .form-submit:hover { opacity: 0.85; transform: translateY(-2px); }
+
+    footer {
+      background: var(--bg); border-top: 1px solid var(--line);
+      padding: 2rem 3rem;
+      display: flex; justify-content: space-between; align-items: center;
+      font-size: 0.78rem; color: var(--muted);
+    }
+    .footer-brand { font-family: 'Playfair Display', serif; color: var(--accent); font-size: 1.1rem; }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(24px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes scrollPulse {
+      0%, 100% { opacity: 0.4; }
+      50% { opacity: 1; }
+    }
+    .reveal { opacity: 0; transform: translateY(30px); transition: opacity 0.7s, transform 0.7s; }
+    .reveal.visible { opacity: 1; transform: translateY(0); }
+
+    @media (max-width: 768px) {
+      nav { padding: 1.2rem 1.5rem; }
+      .nav-links { display: none; }
+      section { padding: 4rem 1.5rem; }
+      .hero { padding: 7rem 1.5rem 3rem; }
+      .profil-grid, .kontak-grid { grid-template-columns: 1fr; gap: 3rem; }
+      .portfolio-grid { grid-template-columns: 1fr; }
+      footer { flex-direction: column; gap: 0.5rem; text-align: center; }
+    }
+  </style>
+</head>
+<body>
+<div class="cursor" id="cursor"></div>
+<div class="cursor-ring" id="cursorRing"></div>
+
+<div id="app">
+  <nav :class="{ scrolled: scrolled }">
+    <div class="nav-logo">{{ firstName }}.</div>
+    <ul class="nav-links">
+      <li v-for="item in navItems" :key="item.id">
+        <a :href="'#' + item.id" :class="{ active: activeSection === item.id }">{{ item.label }}</a>
+      </li>
+    </ul>
+  </nav>
+
+  <!-- HERO -->
+  <section class="hero" id="beranda">
+    <div class="hero-grid"></div>
+    <div class="hero-glow"></div>
+    <div class="hero-glow2"></div>
+    <div class="hero-content">
+      <div class="hero-badge">Portfolio · 2025</div>
+      <h1 class="hero-name">
+        {{ firstName }}<br>
+        <span class="line2">{{ lastName }}</span>
+      </h1>
+      <p class="hero-desc">{{ tagline }}</p>
+      <div class="hero-cta">
+        <a href="#profil" class="btn-primary">Lihat Profil</a>
+        <a href="#kontak" class="btn-outline">Hubungi Saya</a>
+      </div>
+    </div>
+    <div class="hero-scroll">
+      <div class="scroll-line"></div>
+      <span>Scroll</span>
+    </div>
+  </section>
+
+  <!-- PROFIL -->
+  <section id="profil">
+    <div class="section-header reveal">
+      <span class="section-num">01</span>
+      <h2 class="section-title">Profil Diri</h2>
+      <div class="section-line"></div>
+    </div>
+    <div class="profil-grid">
+      <div class="reveal" style="transition-delay:0.1s">
+        <div class="profil-img-wrap">
+          <div class="profil-avatar">🧑‍💻</div>
+        </div>
+      </div>
+      <div class="profil-text reveal" style="transition-delay:0.2s">
+        <div class="profil-tag">Tentang Saya</div>
+        <h3>{{ namaLengkap }}</h3>
+        <p>{{ bio1 }}</p>
+        <p>{{ bio2 }}</p>
+        <div class="profil-info">
+          <div class="info-item" v-for="item in profilInfo" :key="item.label">
+            <div class="info-label">{{ item.label }}</div>
+            <div class="info-val">{{ item.value }}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SKILL -->
+  <section id="skill">
+    <div class="section-header reveal">
+      <span class="section-num">02</span>
+      <h2 class="section-title">Skill &amp; Minat</h2>
+      <div class="section-line"></div>
+    </div>
+    <div class="skill-grid">
+      <div v-for="(skill, i) in skills" :key="i" class="skill-card reveal" :style="{ transitionDelay: (i * 0.08) + 's' }">
+        <div class="skill-icon">{{ skill.icon }}</div>
+        <div class="skill-name">{{ skill.name }}</div>
+        <div class="skill-desc">{{ skill.desc }}</div>
+        <div class="skill-tags">
+          <span v-for="tag in skill.tags" :key="tag" class="skill-tag">{{ tag }}</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PENUGASAN -->
+  <section id="penugasan">
+    <div class="section-header reveal">
+      <span class="section-num">03</span>
+      <h2 class="section-title">Penugasan</h2>
+      <div class="section-line"></div>
+    </div>
+    <div class="penugasan-tabs reveal">
+      <button
+        v-for="tab in penugasanTabs" :key="tab.id"
+        class="tab-btn" :class="{ active: activeTab === tab.id }"
+        @click="activeTab = tab.id"
+      >{{ tab.label }}</button>
+    </div>
+    <div v-for="tab in penugasanTabs" :key="tab.id" class="penugasan-panel" :class="{ active: activeTab === tab.id }">
+      <div v-for="(item, i) in tab.items" :key="i" class="penugasan-card">
+        <div class="penugasan-meta">
+          <span class="penugasan-num">{{ tab.id.toUpperCase().replace('PENUGASAN','P') }}-{{ String(i+1).padStart(2,'0') }}</span>
+          <span class="penugasan-date">{{ item.date }}</span>
+        </div>
+        <h3>{{ item.title }}</h3>
+        <p>{{ item.desc }}</p>
+        <div class="penugasan-result">
+          <div class="penugasan-result-label">Hasil / Output</div>
+          <div style="font-size:0.9rem">{{ item.result }}</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PORTFOLIO / ORGANISASI -->
+  <section id="portfolio">
+    <div class="section-header reveal">
+      <span class="section-num">04</span>
+      <h2 class="section-title">{{ portfolioTitle }}</h2>
+      <div class="section-line"></div>
+    </div>
+    <div class="portfolio-grid">
+      <div v-for="(item, i) in portfolioItems" :key="i" class="portfolio-card reveal" :style="{ transitionDelay: (i * 0.1) + 's' }">
+        <div class="portfolio-thumb">{{ item.emoji }}</div>
+        <div class="portfolio-body">
+          <div class="portfolio-category">{{ item.category }}</div>
+          <div class="portfolio-title">{{ item.title }}</div>
+          <div class="portfolio-desc">{{ item.desc }}</div>
+          <div class="portfolio-footer">
+            <span>{{ item.year }}</span>
+            <a href="#" class="portfolio-link">Detail →</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- KONTAK -->
+  <section id="kontak">
+    <div class="section-header reveal">
+      <span class="section-num">05</span>
+      <h2 class="section-title">Kontak</h2>
+      <div class="section-line"></div>
+    </div>
+    <div class="kontak-grid">
+      <div class="reveal">
+        <h3>Mari Terhubung</h3>
+        <p>Tertarik berkolaborasi atau ingin mengetahui lebih lanjut? Jangan ragu untuk menghubungi saya.</p>
+        <div class="kontak-links">
+          <a href="mailto:email@contoh.com" class="kontak-link">
+            <span class="kontak-link-icon">📧</span>
+            <div class="kontak-link-info">
+              <div class="kontak-link-type">Email</div>
+              <div class="kontak-link-val">email@contoh.com</div>
+            </div>
+            <span>→</span>
+          </a>
+          <a href="#" class="kontak-link">
+            <span class="kontak-link-icon">💼</span>
+            <div class="kontak-link-info">
+              <div class="kontak-link-type">LinkedIn</div>
+              <div class="kontak-link-val">linkedin.com/in/username</div>
+            </div>
+            <span>→</span>
+          </a>
+          <a href="#" class="kontak-link">
+            <span class="kontak-link-icon">🐱</span>
+            <div class="kontak-link-info">
+              <div class="kontak-link-type">GitHub</div>
+              <div class="kontak-link-val">github.com/username</div>
+            </div>
+            <span>→</span>
+          </a>
+          <a href="#" class="kontak-link">
+            <span class="kontak-link-icon">📱</span>
+            <div class="kontak-link-info">
+              <div class="kontak-link-type">WhatsApp</div>
+              <div class="kontak-link-val">+62 812-3456-7890</div>
+            </div>
+            <span>→</span>
+          </a>
+        </div>
+      </div>
+      <div class="reveal" style="transition-delay:0.15s">
+        <form class="kontak-form" @submit.prevent="submitForm">
+          <div class="form-group">
+            <label class="form-label">Nama Lengkap</label>
+            <input v-model="form.nama" type="text" class="form-input" placeholder="Nama Anda" required />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Email</label>
+            <input v-model="form.email" type="email" class="form-input" placeholder="email@anda.com" required />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Pesan</label>
+            <textarea v-model="form.pesan" class="form-textarea" placeholder="Tulis pesan Anda..." required></textarea>
+          </div>
+          <button type="submit" class="form-submit">
+            {{ formSent ? '✓ Pesan Terkirim!' : 'Kirim Pesan' }}
+          </button>
+        </form>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="footer-brand">{{ firstName }}.</div>
+    <div>© 2025 {{ namaLengkap }}. Dibuat dengan ❤️</div>
+    <a href="#beranda" style="color:var(--accent);text-decoration:none;font-size:0.78rem">↑ Kembali ke Atas</a>
+  </footer>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/vue/3.3.4/vue.global.prod.min.js"></script>
+<script>
+const { createApp, ref, computed, onMounted } = Vue;
+
+createApp({
+  setup() {
+    // ============================================================
+    // ✏️  EDIT DATA DI BAWAH INI SESUAI KEBUTUHAN ANDA
+    // ============================================================
+
+    const namaLengkap = ref('Nama Lengkap Anda');
+    const tagline = ref('Mahasiswa yang bersemangat menjelajahi dunia teknologi, kreativitas, dan inovasi.');
+
+    const bio1 = ref('Saya adalah seorang mahasiswa yang memiliki minat mendalam di bidang teknologi informasi dan pengembangan perangkat lunak. Dengan semangat belajar yang tinggi, saya terus mengembangkan kompetensi diri melalui berbagai penugasan dan proyek.');
+    const bio2 = ref('Saya percaya bahwa kolaborasi dan kreativitas adalah kunci untuk menciptakan solusi yang bermakna. Visi saya adalah berkontribusi nyata pada transformasi digital Indonesia.');
+
+    const profilInfo = ref([
+      { label: 'Universitas', value: 'Universitas Anda' },
+      { label: 'Program Studi', value: 'Nama Prodi' },
+      { label: 'Angkatan', value: '2022' },
+      { label: 'Lokasi', value: 'Kota, Indonesia' },
+    ]);
+
+    const skills = ref([
+      { icon: '💻', name: 'Pemrograman', desc: 'Pengembangan aplikasi web dan mobile dengan berbagai bahasa pemrograman modern.', tags: ['Python', 'JavaScript', 'Java'] },
+      { icon: '🎨', name: 'Desain UI/UX', desc: 'Merancang antarmuka yang intuitif dan estetis untuk pengalaman pengguna terbaik.', tags: ['Figma', 'Canva', 'Adobe XD'] },
+      { icon: '📊', name: 'Analisis Data', desc: 'Mengolah dan memvisualisasikan data untuk menghasilkan insight yang bermakna.', tags: ['Excel', 'Python', 'Tableau'] },
+      { icon: '🤝', name: 'Kepemimpinan', desc: 'Memimpin tim, berkomunikasi efektif, dan berkolaborasi dalam lingkungan dinamis.', tags: ['Teamwork', 'Public Speaking'] },
+      { icon: '📱', name: 'Media Sosial', desc: 'Strategi konten kreatif dan manajemen komunitas di berbagai platform digital.', tags: ['Instagram', 'TikTok', 'Content'] },
+      { icon: '🔬', name: 'Penelitian', desc: 'Metodologi penelitian ilmiah, penulisan karya tulis, dan analisis literatur.', tags: ['Research', 'Academic Writing'] },
+    ]);
+
+    const activeTab = ref('penugasan2');
+    const penugasanTabs = ref([
+      {
+        id: 'penugasan2', label: 'Penugasan 2',
+        items: [{
+          title: 'Judul Penugasan 2',
+          date: 'Maret 2025',
+          desc: 'Deskripsi penugasan kedua. Jelaskan apa yang dikerjakan, tujuan, dan metodologi yang digunakan dalam menyelesaikan penugasan ini secara detail.',
+          result: 'Hasil yang dicapai: laporan, dokumen, atau output lainnya yang dihasilkan dari penugasan ini.',
+        }],
+      },
+      {
+        id: 'penugasan3', label: 'Penugasan 3',
+        items: [{
+          title: 'Judul Penugasan 3',
+          date: 'April 2025',
+          desc: 'Deskripsi penugasan ketiga. Jelaskan apa yang dikerjakan, tujuan, dan metodologi yang digunakan dalam penugasan ini.',
+          result: 'Hasil yang dicapai beserta evaluasi dan pembelajaran yang didapat dari penugasan ketiga ini.',
+        }],
+      },
+      {
+        id: 'penugasan4', label: 'Penugasan 4',
+        items: [{
+          title: 'Judul Penugasan 4',
+          date: 'Mei 2025',
+          desc: 'Deskripsi penugasan keempat. Jelaskan apa yang dikerjakan, tujuan, dan metodologi yang digunakan dalam penugasan ini.',
+          result: 'Hasil akhir penugasan keempat dan dampak yang dihasilkan dari pekerjaan ini.',
+        }],
+      },
+    ]);
+
+    // Ganti title & isi jika ingin tampilkan Portofolio/Proyek
+    const portfolioTitle = ref('Riwayat Organisasi');
+    const portfolioItems = ref([
+      { emoji: '🏛️', category: 'Organisasi Kampus', title: 'Himpunan Mahasiswa Prodi', desc: 'Aktif sebagai anggota divisi keilmuan, bertanggung jawab mengkoordinasi kegiatan akademik dan seminar jurusan.', year: '2022–2023' },
+      { emoji: '💡', category: 'Unit Kegiatan Mahasiswa', title: 'UKM Teknologi & Inovasi', desc: 'Berkontribusi dalam tim pengembangan aplikasi dan partisipasi kompetisi hackathon tingkat nasional.', year: '2023–2024' },
+      { emoji: '🌍', category: 'Kegiatan Sosial', title: 'Komunitas Pengabdian Masyarakat', desc: 'Relawan aktif dalam program literasi digital dan pelatihan komputer dasar untuk masyarakat pedesaan.', year: '2023–2024' },
+      { emoji: '🏆', category: 'Kepanitiaan', title: 'Ketua Divisi Acara — Tech Fest', desc: 'Memimpin tim acara dalam menyelenggarakan festival teknologi tahunan kampus dengan 500+ peserta.', year: '2024' },
+    ]);
+
+    // ============================================================
+
+    const firstName = computed(() => namaLengkap.value.split(' ')[0]);
+
+    const form = ref({ nama: '', email: '', pesan: '' });
+    const formSent = ref(false);
+    function submitForm() {
+      formSent.value = true;
+      form.value = { nama: '', email: '', pesan: '' };
+      setTimeout(() => formSent.value = false, 4000);
+    }
+
+    const navItems = [
+      { id: 'profil', label: 'Profil' },
+      { id: 'skill', label: 'Skill' },
+      { id: 'penugasan', label: 'Penugasan' },
+      { id: 'portfolio', label: 'Organisasi' },
+      { id: 'kontak', label: 'Kontak' },
+    ];
+    const scrolled = ref(false);
+    const activeSection = ref('beranda');
+
+    onMounted(() => {
+      window.addEventListener('scroll', () => {
+        scrolled.value = window.scrollY > 60;
+        const ids = ['kontak', 'portfolio', 'penugasan', 'skill', 'profil', 'beranda'];
+        for (const id of ids) {
+          const el = document.getElementById(id);
+          if (el && window.scrollY + 140 >= el.offsetTop) {
+            activeSection.value = id; break;
+          }
+        }
+      });
+
+      const obs = new IntersectionObserver((entries) => {
+        entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+      }, { threshold: 0.1 });
+      document.querySelectorAll('.reveal').forEach(r => obs.observe(r));
+
+      const cursor = document.getElementById('cursor');
+      const ring = document.getElementById('cursorRing');
+      document.addEventListener('mousemove', e => {
+        cursor.style.transform = `translate(${e.clientX - 4}px, ${e.clientY - 4}px)`;
+        ring.style.transform = `translate(${e.clientX - 18}px, ${e.clientY - 18}px)`;
+      });
+      document.querySelectorAll('a, button').forEach(el => {
+        el.addEventListener('mouseenter', () => ring.classList.add('hover'));
+        el.addEventListener('mouseleave', () => ring.classList.remove('hover'));
+      });
+    });
+
+    return {
+      namaLengkap, firstName, tagline, bio1, bio2, profilInfo,
+      skills, activeTab, penugasanTabs,
+      portfolioTitle, portfolioItems,
+      form, formSent, submitForm,
+      navItems, scrolled, activeSection,
+    };
+  }
+}).mount('#app');
+</script>
+</body>
+</html>
